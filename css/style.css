@@ -19,6 +19,8 @@ button {
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+    white-space: nowrap; 
+    overflow: hidden; 
 }
 
 button:hover {

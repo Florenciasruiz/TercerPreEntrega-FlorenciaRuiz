@@ -14,8 +14,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const seccionCategoria = document.querySelector('#seccion-categoria');
     const seccionPregunta = document.querySelector('#seccion-pregunta');
     const botonSiguiente = document.querySelector('#siguiente');
-
+    
     botonSiguiente.addEventListener("click", siguientePregunta);
+
+    const botonCancelar = document.querySelector('#cancelar'); 
+
+    botonCancelar.addEventListener("click", function() {
+        if (confirm("¿Estás seguro de que quieres cancelar el juego?")) {
+            alert("¡Has cancelado el juego!");
+            resetearJuego();
+        }
+    });
 
     let indicePreguntaActual = 0;
     let preguntasFiltradas = [];
@@ -43,6 +52,12 @@ document.addEventListener("DOMContentLoaded", function() {
     botonModoColor.addEventListener("click", toggleDarkMode);
     botonIniciarJuego.addEventListener("click", iniciarJuego);
     botonElegirCategoria.addEventListener("click", elegirCategoria);
+    botonCancelar.addEventListener("click", function() {
+        if (confirm("¿Estás seguro de que quieres cancelar el juego?")) {
+            alert("¡Has cancelado el juego!");
+            resetearJuego();
+        }
+    });
     botonSiguiente.addEventListener("click", siguientePregunta);
 
     function toggleDarkMode() {
@@ -89,6 +104,16 @@ document.addEventListener("DOMContentLoaded", function() {
     function obtenerPreguntasPorCategoria(categoria) {
         return preguntas.filter(pregunta => pregunta.categoria === categoria);
     }
+
+    function resetearJuego() {
+        seccionBienvenida.style.display = 'flex';
+        seccionCategoria.style.display = 'none';
+        seccionPregunta.style.display = 'none';
+        seccionResultado.style.display = 'none';
+        indicePreguntaActual = 0;
+        preguntasFiltradas = [];
+        window.scrollTo(0, 0); 
+    }    
 
     function mostrarPregunta(preguntaObjeto) {
         textoPregunta.textContent = preguntaObjeto.pregunta;
