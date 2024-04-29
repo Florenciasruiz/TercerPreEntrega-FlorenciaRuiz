@@ -5,8 +5,8 @@ body {
     margin: 0;
     padding: 20px;
     line-height: 1.6;
-    position: relative;
-    height: 100vh;
+    position: relative;  /* Necesario para el posicionamiento absoluto de elementos */
+    height: 100vh; /* Asegura que el cuerpo toma toda la altura de la ventana */
 }
 
 button {
@@ -47,10 +47,32 @@ button:hover {
 input, select {
     padding: 10px;
     margin: 10px 0;
-    width: 80%;
+    width: 50%; 
 }
 
 .modo-oscuro {
     background-color: #333;
     color: #fff;
 }
+
+/* Estilos para mensajes de error */
+#mensaje-error {
+    color: red;
+    font-weight: bold;
+}
+
+.opcion {
+    display: block; 
+    margin: 10px 0; 
+    width: 100%; }
+
+    #nombre-jugador, #categoria {
+        display: block; /* Asegura que el input y select no estén en línea */
+        margin: 0 auto; /* Centra el input y select horizontalmente */
+        margin-bottom: 20px; /* Espacio debajo del input y select */
+    }
+    
+    .titulo {
+        text-align: center; /* Centra el texto del título */
+        margin-bottom: 20px; /* Espacio debajo del título */
+    }
