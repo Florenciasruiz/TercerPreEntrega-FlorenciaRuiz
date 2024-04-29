@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     const cuerpo = document.body;
     const botonModoColor = document.querySelector('#modo-color');
     const iconoModo = document.querySelector('#icono-modo');
@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const seccionResultado = document.querySelector('#seccion-resultado');
     const textoResultado = document.querySelector('#resultado');
     const botonSiguiente = document.querySelector('#siguiente');
-    const titulo = document.querySelector('.titulo');
 
     let indicePreguntaActual = 0;
     let preguntasFiltradas = [];
@@ -38,76 +37,62 @@ document.addEventListener("DOMContentLoaded", function() {
 
     botonModoColor.addEventListener("click", toggleDarkMode);
 
-    botonIniciarJuego.addEventListener("click", function() {
+    botonIniciarJuego.addEventListener("click", () => {
         let nombreJugador = inputNombreJugador.value.trim();
         if (nombreJugador) {
-            titulo.textContent = `¡Bienvenido a MusiQ, ${nombreJugador}!`;
-            alternarMostrar('#seccion-bienvenida', '#seccion-categoria');
+            toggleDisplay('#seccion-bienvenida', '#seccion-categoria');
         } else {
-            mostrarMensajeError("Por favor, ingresa un nombre.");
+            alert("Por favor, ingresa un nombre.");
         }
     });
 
-    botonElegirCategoria.addEventListener("click", function() {
+    botonElegirCategoria.addEventListener("click", () => {
         let categoria = seleccionCategoria.value;
         if (categoria) {
             preguntasFiltradas = obtenerPreguntasPorCategoria(categoria);
             mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
-            alternarMostrar('#seccion-categoria', '#seccion-pregunta');
+            toggleDisplay('#seccion-categoria', '#seccion-pregunta');
         } else {
-            mostrarMensajeError("Por favor, selecciona una categoría.");
+            alert("Por favor, selecciona una categoría.");
         }
     });
 
-    botonSiguiente.addEventListener("click", function() {
+    botonSiguiente.addEventListener("click", () => {
         indicePreguntaActual++;
         if (indicePreguntaActual < preguntasFiltradas.length) {
             mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
         } else {
-            mostrarMensajeError("Has completado todas las preguntas de esta categoría. ¡Buen trabajo!");
+            alert("Has completado todas las preguntas de esta categoría. ¡Buen trabajo!");
             indicePreguntaActual = 0;
-            alternarMostrar('#seccion-resultado', '#seccion-categoria');
+            toggleDisplay('#seccion-resultado', '#seccion-categoria');
         }
     });
 
-    function toggleDarkMode() {
+    const toggleDarkMode = () => {
         cuerpo.classList.toggle('modo-oscuro');
         iconoModo.textContent = cuerpo.classList.contains('modo-oscuro') ? '🌜' : '🌞';
-    }
+    };
 
-    function alternarMostrar(elementoActual, elementoSiguiente) {
-        document.querySelector(elementoActual).style.display = 'none';
-        document.querySelector(elementoSiguiente).style.display = 'flex';
-    }
+    const toggleDisplay = (hideSelector, showSelector) => {
+        document.querySelector(hideSelector).style.display = 'none';
+        document.querySelector(showSelector).style.display = 'flex';
+    };
 
-    function mostrarMensajeError(mensaje) {
-        textoResultado.textContent = mensaje;
-        seccionResultado.style.display = 'block';
-        setTimeout(function() {
-            seccionResultado.style.display = 'none';
-        }, 3000);
-    }
+    const obtenerPreguntasPorCategoria = (categoria) => preguntas.filter(pregunta => pregunta.categoria === categoria);
 
-    function obtenerPreguntasPorCategoria(categoria) {
-        return preguntas.filter(pregunta => pregunta.categoria === categoria);
-    }
-
-    function mostrarPregunta(preguntaObjeto) {
+    const mostrarPregunta = (preguntaObjeto) => {
         textoPregunta.textContent = preguntaObjeto.pregunta;
         divOpciones.innerHTML = '';
-        const opciones = preguntaObjeto.opciones.split('\n');
-        opciones.forEach(function(opcion) {
+        preguntaObjeto.opciones.split('\n').forEach(opcion => {
             let botonOpcion = document.createElement('button');
             botonOpcion.textContent = opcion;
             botonOpcion.classList.add('opcion');
-            botonOpcion.addEventListener('click', function() {
-                verificarRespuesta(opcion.charAt(0), preguntaObjeto.respuestaCorrecta);
-            });
+            botonOpcion.addEventListener('click', () => verificarRespuesta(opcion.charAt(0), preguntaObjeto.respuestaCorrecta));
             divOpciones.appendChild(botonOpcion);
         });
-    }
+    };
 
-    function verificarRespuesta(opcionSeleccionada, respuestaCorrecta) {
+    const verificarRespuesta = (opcionSeleccionada, respuestaCorrecta) => {
         if (opcionSeleccionada === respuestaCorrecta) {
             textoResultado.textContent = "¡Correcto!";
             textoResultado.style.color = "green";
@@ -115,6 +100,6 @@ document.addEventListener("DOMContentLoaded", function() {
             textoResultado.textContent = `Incorrecto. La respuesta correcta es: ${respuestaCorrecta.toUpperCase()}.`;
             textoResultado.style.color = "red";
         }
-        alternarMostrar('#seccion-pregunta', '#seccion-resultado');
-    }
+        toggleDisplay('#seccion-pregunta', '#seccion-resultado');
+    };
 });
