@@ -1,33 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const cuerpo = document.body;
-    const botonModoColor = document.querySelector('#modo-color');
-    const iconoModo = document.querySelector('#icono-modo');
-    const inputNombreJugador = document.querySelector('#nombre-jugador');
-    const botonIniciarJuego = document.querySelector('#iniciar-juego');
-    const seleccionCategoria = document.querySelector('#categoria');
-    const botonElegirCategoria = document.querySelector('#elegir-categoria');
-    const textoPregunta = document.querySelector('#pregunta');
-    const divOpciones = document.querySelector('#opciones');
-    const seccionResultado = document.querySelector('#seccion-resultado');
-    const textoResultado = document.querySelector('#resultado');
-    const seccionBienvenida = document.querySelector('#seccion-bienvenida');
-    const seccionCategoria = document.querySelector('#seccion-categoria');
-    const seccionPregunta = document.querySelector('#seccion-pregunta');
-    const botonSiguiente = document.querySelector('#siguiente');
-    
-    botonSiguiente.addEventListener("click", siguientePregunta);
-
-    const botonCancelar = document.querySelector('#cancelar'); 
-
-    botonCancelar.addEventListener("click", function() {
-        if (confirm("¿Estás seguro de que quieres cancelar el juego?")) {
-            alert("¡Has cancelado el juego!");
-            resetearJuego();
-        }
-    });
-
-    let indicePreguntaActual = 0;
-    let preguntasFiltradas = [];
+        // Definición de preguntas en el ámbito global dentro de DOMContentLoaded
     const preguntas = [
         {
             pregunta: "¿Quién es el líder de la banda británica Queen?",
@@ -47,18 +19,39 @@ document.addEventListener("DOMContentLoaded", function() {
             respuestaCorrecta: "d",
             categoria: "eventos"
         }
-    ];
+        ];
 
+    const cuerpo = document.body;
+    const botonModoColor = document.querySelector('#modo-color');
+    const iconoModo = document.querySelector('#icono-modo');
+    const inputNombreJugador = document.querySelector('#nombre-jugador');
+    const botonIniciarJuego = document.querySelector('#iniciar-juego');
+    const seleccionCategoria = document.querySelector('#categoria');
+    const botonElegirCategoria = document.querySelector('#elegir-categoria');
+    const textoPregunta = document.querySelector('#pregunta');
+    const divOpciones = document.querySelector('#opciones');
+    const seccionResultado = document.querySelector('#seccion-resultado');
+    const textoResultado = document.querySelector('#resultado');
+    const seccionBienvenida = document.querySelector('#seccion-bienvenida');
+    const seccionCategoria = document.querySelector('#seccion-categoria');
+    const seccionPregunta = document.querySelector('#seccion-pregunta');
+    const botonSiguiente = document.querySelector('#siguiente');
+
+    // Recuperación de datos del Storage y deserialización
+    const preguntasFiltradasGuardadas = JSON.parse(localStorage.getItem('preguntasFiltradas')) || [];
+    const indicePreguntaActualGuardado = parseInt(localStorage.getItem('indicePreguntaActual'), 10);
+
+    if (preguntasFiltradasGuardadas.length > 0 && indicePreguntaActualGuardado >= 0) {
+        preguntasFiltradas = preguntasFiltradasGuardadas;
+        indicePreguntaActual = indicePreguntaActualGuardado;
+        mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
+        toggleDisplay(seccionBienvenida, seccionPregunta);
+    }
+
+    botonSiguiente.addEventListener("click", siguientePregunta);
     botonModoColor.addEventListener("click", toggleDarkMode);
     botonIniciarJuego.addEventListener("click", iniciarJuego);
     botonElegirCategoria.addEventListener("click", elegirCategoria);
-    botonCancelar.addEventListener("click", function() {
-        if (confirm("¿Estás seguro de que quieres cancelar el juego?")) {
-            alert("¡Has cancelado el juego!");
-            resetearJuego();
-        }
-    });
-    botonSiguiente.addEventListener("click", siguientePregunta);
 
     function toggleDarkMode() {
         cuerpo.classList.toggle('modo-oscuro');
@@ -70,18 +63,28 @@ document.addEventListener("DOMContentLoaded", function() {
         if (nombreJugador) {
             toggleDisplay(seccionBienvenida, seccionCategoria);
         } else {
-            alert("Por favor, ingresa un nombre.");
+            alert("Por favor, ingresa un nombre para empezar el juego.");
         }
     }
 
+
     function elegirCategoria() {
         let categoria = seleccionCategoria.value;
+        console.log("Categoría seleccionada:", categoria); 
         if (categoria) {
             preguntasFiltradas = obtenerPreguntasPorCategoria(categoria);
-            mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
-            toggleDisplay(seccionCategoria, seccionPregunta);
+            console.log("Preguntas filtradas:", preguntasFiltradas); 
+            if (preguntasFiltradas.length > 0) {
+                localStorage.setItem('preguntasFiltradas', JSON.stringify(preguntasFiltradas));
+                indicePreguntaActual = 0;
+                localStorage.setItem('indicePreguntaActual', indicePreguntaActual.toString());
+                mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
+                toggleDisplay(seccionCategoria, seccionPregunta);
+            } else {
+                alert("No hay preguntas disponibles para esta categoría."); // Informar al usuario si no hay preguntas
+            }
         } else {
-            alert("Por favor, selecciona una categoría.");
+            alert("Debes seleccionar una categoría para continuar.");
         }
     }
 
@@ -89,11 +92,43 @@ document.addEventListener("DOMContentLoaded", function() {
         indicePreguntaActual++;
         if (indicePreguntaActual < preguntasFiltradas.length) {
             mostrarPregunta(preguntasFiltradas[indicePreguntaActual]);
+            localStorage.setItem('indicePreguntaActual', indicePreguntaActual.toString());
         } else {
             alert("Has completado todas las preguntas de esta categoría. ¡Buen trabajo!");
             indicePreguntaActual = 0;
             toggleDisplay(seccionResultado, seccionCategoria);
         }
+    }
+
+    function mostrarPregunta(preguntaObjeto) {
+        actualizarTextoPregunta(preguntaObjeto.pregunta);
+        actualizarOpciones(preguntaObjeto.opciones, preguntaObjeto.respuestaCorrecta);
+    }
+
+    function actualizarTextoPregunta(texto) {
+        textoPregunta.textContent = texto;
+    }
+
+    function actualizarOpciones(opciones, respuestaCorrecta) {
+        divOpciones.innerHTML = '';
+        opciones.split('\n').forEach(opcion => {
+            let botonOpcion = document.createElement('button');
+            botonOpcion.textContent = opcion;
+            botonOpcion.classList.add('opcion');
+            botonOpcion.onclick = () => verificarRespuesta(opcion.charAt(0), respuestaCorrecta);
+            divOpciones.appendChild(botonOpcion);
+        });
+    }
+
+    function verificarRespuesta(opcionSeleccionada, respuestaCorrecta) {
+        if (opcionSeleccionada.trim().toLowerCase() === respuestaCorrecta.trim().toLowerCase()) {
+            textoResultado.textContent = "¡Correcto!";
+            textoResultado.style.color = "green";
+        } else {
+            textoResultado.textContent = `Incorrecto. La respuesta correcta es: ${respuestaCorrecta.toUpperCase()}.`;
+            textoResultado.style.color = "red";
+        }
+        toggleDisplay(seccionPregunta, seccionResultado);
     }
 
     function toggleDisplay(elementoParaOcultar, elementoParaMostrar) {
@@ -104,39 +139,9 @@ document.addEventListener("DOMContentLoaded", function() {
     function obtenerPreguntasPorCategoria(categoria) {
         return preguntas.filter(pregunta => pregunta.categoria === categoria);
     }
-
-    function resetearJuego() {
-        seccionBienvenida.style.display = 'flex';
-        seccionCategoria.style.display = 'none';
-        seccionPregunta.style.display = 'none';
-        seccionResultado.style.display = 'none';
-        indicePreguntaActual = 0;
-        preguntasFiltradas = [];
-        window.scrollTo(0, 0); 
-    }    
-
-    function mostrarPregunta(preguntaObjeto) {
-        textoPregunta.textContent = preguntaObjeto.pregunta;
-        divOpciones.innerHTML = '';
-        const opciones = preguntaObjeto.opciones.split('\n');
-        opciones.forEach(opcion => {
-            let botonOpcion = document.createElement('button');
-            botonOpcion.textContent = opcion;
-            botonOpcion.classList.add('opcion');
-            botonOpcion.addEventListener('click', () => verificarRespuesta(opcion.charAt(0), preguntaObjeto.respuestaCorrecta));
-            divOpciones.appendChild(botonOpcion);
-        });
-    }
-
-    function verificarRespuesta(opcionSeleccionada, respuestaCorrecta) {
-        if (opcionSeleccionada === respuestaCorrecta) {
-            textoResultado.textContent = "¡Correcto!";
-            textoResultado.style.color = "green";
-        } else {
-            textoResultado.textContent = `Incorrecto. La respuesta correcta es: ${respuestaCorrecta.toUpperCase()}.`;
-            textoResultado.style.color = "red";
-        }
-        toggleDisplay(seccionPregunta, seccionResultado);
-    }
 });
+
+
+
+
 
